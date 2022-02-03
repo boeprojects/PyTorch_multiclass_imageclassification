@@ -58,7 +58,6 @@ BATCH_SIZE = 128 #Zum Einstieg/EDA nehmen wir Batch-Size 4, nach erstem Duchlauf
 - Nicht skalierte (normalisierte) Eingabevariablen können zu einem langsamen oder instabilen Lernprozess führen, während nicht skalierte Zielvariablen bei Regressionsproblemen dazu führen können, dass Gradienten explodieren und der Lernprozess fehlschlägt.“
 ### Erzeugung der Pipeline
 - Transformation der Bilddaten in einen Tensor
-- Robustheit des Trainings durch Start mit kleiner Learning Rate
 ```python
 # (x - x.mean()) / x.std() (Normalisierung)
 
@@ -217,7 +216,7 @@ tensor([[ 1.8028,  0.0142,  0.1897, -0.4372,  0.0413, -2.9302, -0.3038, -3.7052,
 - Optimizer Adam
 ```python
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.001) #Robustheit des Trainings durch Start mit kleiner Learning Rate
 
 for epoch in range(10):
     
