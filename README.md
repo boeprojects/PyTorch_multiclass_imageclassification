@@ -111,7 +111,7 @@ dataloader = {
 len(trainset), len(devset)
 ```
 (45000, 5000)
-## EDA - Explorative Data Analysis
+### EDA - Explorative Data Analysis
  - Lookup und Ausgabe Beispielbild (via Denormalisierung)
  - Konzeption eines Torch NN als Vorkonzeption der wesentlichen Parameter, Architektur
  - Erste Konzeption der Shape, des Padding, vor den eigentlichen PyTorch Model
@@ -148,7 +148,7 @@ output = conv3(output)
 output.shape
 ```
 torch.Size([4, 6, 32, 32])
-## PyTorch Convolutional Model (inkl. Linear Layer)
+### PyTorch Convolutional Model (inkl. Linear Layer)
 - Convolutional 2d Layer
 - MaxPooling => Robustheit Lernprozess gegenüber Schwankungen, durch Reduktion der Anzahl der Dimensionen der feature Map
 - Flatten Layer => Serialisierung der Dimensionalität auf Anzahl der Elemente dieses Tensor auf Inputformat für Linear-Layer (hier 1600)
@@ -209,7 +209,7 @@ tensor([[ 1.8028,  0.0142,  0.1897, -0.4372,  0.0413, -2.9302, -0.3038, -3.7052,
         [-0.0977, -0.8777, -0.5549,  0.1869, -0.4560, -2.3032, -0.2049, -1.9178,
           3.6340, -0.6968]], device='cuda:0', grad_fn=<AddmmBackward>)
 ```
- ## Fitting Cycle
+ ### Fitting Cycle
 - Split Dev-Set als Validaton Dataset (Trainset bereits vorhanden)
 - Update Dataloader mit Dev-Set
 - Innerhalb einer supervised Learning Classification aufgabe nutzen wir passend Categorical Crossentropy Loss als Lossfunktion
@@ -266,7 +266,76 @@ for epoch in range(10):
 9 train 0.85
 9 dev 1.14
 ```
- 
+## Ausblick für die Anpassung und Überarbeitung
+ - An dieser Stelle fehlt eine Metrik für den Loss, der als Größe hier nicht einschätzbar ist (siehe train, dev Werte in der Epoche) \
+   um Aussagen über den Verlauf der Lernkurve treffen zu können.
+ - Zeilenweise Summierung des Maximums an definierter Stelle der Werte (.argmax(axis=1) und Berechnung einer Wahrscheinlichkeit in
+   torch.sum(softmax(outputs).argmax(axis=1) == labels)/len(labels) => wir errechnen eine accuracy
+ - Daraus dann eine mean accuracy, außerdem einen mean Loss!
+ - Aktivierungsfunktion für Multiclass classification ist softmax
+
+### Überarbeitung des Fitting Cycle
+```python
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+softmax = nn.Softmax()
+
+for epoch in range(10):
+    
+    for phase in ["train", "dev"]:
+        running_loss = 0.0
+        running_acc = 0.0
+        if phase == "train":
+            model.train()
+        else:
+            model.eval()
+
+        for inputs, labels in dataloader[phase]:
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+
+            outputs = model(inputs)
+
+            loss = criterion(outputs, labels)
+
+            acc = torch.sum(softmax(outputs).argmax(axis=1) == labels)/len(labels) #Errechnung der accuracy
+
+            if phase == "train":
+                loss.backward()
+                optimizer.step()
+
+            running_loss += loss.item()
+            running_acc += acc.item()
+
+        mean_loss = running_loss / len(dataloader[phase]) # loss pro batch / Anzahl der Batches ergibt mean_loss
+        mean_acc = running_acc / len(dataloader[phase]) # accuracy pro batch / Anzahl der Batches ergibt mean_acc
+        print(f'{epoch+1} {phase} {mean_loss:.2f} {mean_acc:.2f}') # Ausgabe mean loss und mean accuracy
+
+1 train 0.85 0.70
+1 dev 1.19 0.60
+2 train 0.81 0.72
+2 dev 1.24 0.60
+3 train 0.78 0.73
+3 dev 1.27 0.59
+4 train 0.76 0.73
+4 dev 1.29 0.60
+5 train 0.74 0.74
+5 dev 1.30 0.60
+6 train 0.71 0.75
+6 dev 1.33 0.60
+7 train 0.68 0.76
+7 dev 1.37 0.60
+8 train 0.66 0.77
+8 dev 1.43 0.60
+9 train 0.64 0.78
+9 dev 1.49 0.59
+10 train 0.63 0.78
+10 dev 1.51 0.60
+```
+
+
+
 ```python
 
 ```
