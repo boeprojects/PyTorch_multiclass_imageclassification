@@ -346,8 +346,278 @@ for epoch in range(10):
 -	Da der Gradient auf vorhergehende Schichten zurückpropagiert wird, kann dieser wiederholte Prozess den Gradienten extrem klein machen oder extrem vergrößern durch     Übergewicht in tiefen NN mit vielen Layern – dies wird durch die residual function neutralisiert und verhindert
 -	Die Residuen werden auf Null gesetzt, die Gradientenwerte für einige bestimmte Layer neutralisiert, indem diese übersprungen werden
 ![ResNet_01](https://user-images.githubusercontent.com/67191365/152990099-a0fbc714-d8d7-4127-aeb1-3e7c42e7c11d.PNG)
+```python
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(1600, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+        self.g = nn.ReLU()
+        self.dropout = nn.Dropout(p=0.2)
+  
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.g(x)
+        x = self.pool(x)
+        x = self.conv2(x)
+        x = self.g(x)
+        x = self.flatten(x)
+        x = self.fc1(x)
+        x = self.g(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.g(x)
+        x = self.dropout(x)
+        x = self.fc3(x)
+        return x
 
+#model = Net().to(device)
+model = torchvision.models.resnet18(pretrained=True)
+model.fc = nn.Linear(512, 10)
+model = model.to(device)
+model
 
+ResNet(
+  (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (relu): ReLU(inplace=True)
+  (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (fc): Linear(in_features=512, out_features=10, bias=True)
+)
+```
+```python
+model(example_batch.to(device))
+
+tensor([[-0.3908, -0.0048,  0.0782, -0.1384, -0.3805, -0.3151,  0.6134, -0.2620,
+         -0.6883, -1.2653],
+        [-1.1035,  0.5565, -0.7254,  0.4781,  0.9075, -1.3814, -0.5302, -1.3947,
+         -1.8154,  0.1784],
+        [-0.4467, -0.1847,  0.2426,  0.7554,  0.4370,  0.7123,  0.3907, -0.1662,
+          0.9159,  0.4060],
+        [ 1.3067, -1.1378,  0.0538,  1.9291, -0.1417,  0.0125,  0.7161,  0.7316,
+          0.0621,  0.4172]], device='cuda:0', grad_fn=<AddmmBackward0>)
+``` 
+```python
+ 
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001) # Robustheit des Trainings durch Start mit kleiner Learning Rate
+softmax = nn.Softmax()
+
+for epoch in range(50):
+    
+    for phase in ["train", "dev"]:
+        running_loss = 0.0
+        running_acc = 0.0
+        if phase == "train":
+            model.train()
+        else:
+            model.eval()
+
+        for inputs, labels in dataloader[phase]:
+            inputs, labels = inputs.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+
+            outputs = model(inputs)
+
+            loss = criterion(outputs, labels)
+
+            acc = torch.sum(softmax(outputs).argmax(axis=1) == labels)/len(labels)
+
+            if phase == "train":
+                loss.backward()
+                optimizer.step()
+
+            running_loss += loss.item()
+            running_acc += acc.item()
+
+        mean_loss = running_loss / len(dataloader[phase])# loss pro batch / Anzahl der Batches ergibt mean_loss
+        mean_acc = running_acc / len(dataloader[phase])# accuracy pro batch / Anzahl der Batches ergibt mean_acc
+        print(f'{epoch+1} {phase} {mean_loss:.2f} {mean_acc:.2f}')
+
+1 train 0.92 0.69
+1 dev 0.73 0.75
+2 train 0.57 0.81
+2 dev 0.71 0.77
+3 train 0.44 0.85
+3 dev 0.75 0.76
+4 train 0.33 0.89
+4 dev 0.75 0.78
+5 train 0.27 0.91
+5 dev 0.91 0.76
+6 train 0.21 0.93
+6 dev 0.79 0.79
+7 train 0.17 0.94
+7 dev 0.83 0.78
+8 train 0.14 0.95
+8 dev 0.83 0.80
+9 train 0.12 0.96
+9 dev 0.89 0.79
+10 train 0.10 0.97
+10 dev 0.92 0.79
+11 train 0.09 0.97
+11 dev 0.88 0.80
+12 train 0.08 0.97
+12 dev 0.91 0.79
+13 train 0.07 0.98
+13 dev 0.97 0.79
+14 train 0.07 0.98
+14 dev 0.97 0.79
+15 train 0.06 0.98
+15 dev 0.94 0.80
+16 train 0.05 0.98
+16 dev 0.97 0.80
+17 train 0.05 0.98
+17 dev 1.08 0.78
+18 train 0.05 0.98
+18 dev 0.98 0.80
+19 train 0.05 0.98
+19 dev 1.04 0.80
+20 train 0.05 0.98
+20 dev 1.09 0.78
+21 train 0.05 0.98
+21 dev 1.01 0.79
+22 train 0.05 0.98
+22 dev 0.99 0.80
+23 train 0.04 0.99
+23 dev 1.13 0.80
+24 train 0.03 0.99
+24 dev 1.02 0.80
+25 train 0.03 0.99
+25 dev 1.10 0.79
+26 train 0.04 0.99
+26 dev 1.07 0.79
+27 train 0.04 0.99
+27 dev 1.01 0.81
+28 train 0.03 0.99
+28 dev 1.06 0.80
+29 train 0.03 0.99
+29 dev 0.98 0.81
+30 train 0.03 0.99
+30 dev 1.04 0.80
+31 train 0.03 0.99
+31 dev 0.99 0.81
+32 train 0.03 0.99
+32 dev 1.06 0.81
+33 train 0.03 0.99
+33 dev 1.07 0.80
+34 train 0.06 0.98
+34 dev 0.97 0.81
+35 train 0.02 0.99
+35 dev 1.12 0.80
+36 train 0.03 0.99
+36 dev 1.05 0.80
+37 train 0.03 0.99
+37 dev 1.04 0.81
+38 train 0.02 0.99
+38 dev 1.13 0.80
+39 train 0.02 0.99
+39 dev 1.07 0.80
+40 train 0.02 0.99
+40 dev 1.11 0.80
+41 train 0.02 0.99
+41 dev 1.15 0.81
+42 train 0.02 0.99
+42 dev 1.13 0.81
+43 train 0.02 0.99
+43 dev 1.17 0.81
+44 train 0.02 0.99
+44 dev 1.08 0.80
+45 train 0.02 0.99
+45 dev 1.12 0.81
+46 train 0.02 0.99
+46 dev 1.15 0.80
+47 train 0.02 0.99
+47 dev 1.14 0.80
+48 train 0.02 0.99
+48 dev 1.16 0.81
+49 train 0.07 0.98
+49 dev 1.00 0.81
+50 train 0.01 1.00
+50 dev 1.09 0.81
+```
 
 ```python
 
