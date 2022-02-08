@@ -333,6 +333,19 @@ for epoch in range(10):
 10 train 0.63 0.78
 10 dev 1.51 0.60
 ```
+### Zwischenstand: Validation Werte (dev) gehen hoch - Train Kurve geht runter
+- Betrachung der Were genauer: train loss geht runter, train acc geht hoch, dev loss geht hoch, dev acc bewegt sich kaum.
+- wir haben eine niedriger werdenden train set error, daher high variance und müssten mehr daten reinbingen
+- zudem sind die Error Werte auf hohem Niveau.
+### Bessere Strategie ist, auf etablierte, empirisch nachgewiesen wirkungsvollere pretrained models zu setzen vor einer Anpassung der Lernparameter
+
+### Zweiter Durchgang mit ResNet (residual neuronal network)
+
+-	ResNet bietet eine besondere Eignung für image classification
+-	Vorteil der Nutzung eines tiefen Neuronalen Netzes - beschleunigt das Lernen – konzentriert auf den eigentlichen Merkmalsraum
+-	Da der Gradient auf vorhergehende Schichten zurückpropagiert wird, kann dieser wiederholte Prozess den Gradienten extrem klein machen oder extrem vergrößern durch     Übergewicht in tiefen NN mit vielen Layern – dies wird durch die residual function neutralisiert und verhindert
+-	Die Residuen werden auf Null gesetzt, die Gradientenwerte für einige bestimmte Layer neutralisiert, indem diese übersprungen werden
+![ResNet_01](https://user-images.githubusercontent.com/67191365/152990099-a0fbc714-d8d7-4127-aeb1-3e7c42e7c11d.PNG)
 
 
 
