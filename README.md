@@ -346,6 +346,33 @@ for epoch in range(10):
 -	Da der Gradient auf vorhergehende Schichten zurückpropagiert wird, kann dieser wiederholte Prozess den Gradienten extrem klein machen oder extrem vergrößern durch     Übergewicht in tiefen NN mit vielen Layern – dies wird durch die residual function neutralisiert und verhindert
 -	Die Residuen werden auf Null gesetzt, die Gradientenwerte für einige bestimmte Layer neutralisiert, indem diese übersprungen werden
 ![ResNet_01](https://user-images.githubusercontent.com/67191365/152990099-a0fbc714-d8d7-4127-aeb1-3e7c42e7c11d.PNG)
+
+### Anpassungen im bisherigen Code dazu:
+
+#### Scaling parameter in format (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+```python
+transform = transforms.Compose([
+  transforms.ToTensor(), # Umwandlung Bilder in Tensoren
+  transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)) # Normalisieren Daten (x - 0.5) / 0.5, angepasst für ResNet in 0.485 usw.
+])
+``` 
+#### Für das RestNet wird die learning rate sicherheitshalber angepasst von 0.001 auf 0.0001
+```python
+optimizer = optim.Adam(model.parameters(), lr=0.0001) # siehe unten
+```
+#### Der ursprüngliche einfach linar Layer des ResNet Outputs wird durch eine komplexere lineare Architektur ersetzt
+```python
+model = torchvision.models.resnet18(pretrained=True)
+#model.fc = nn.Linear(512, 10)
+model.fc = nn.Sequential(# Layer im Resnet ein wenig komplexer gestalten für bessere Ergebnisse.
+    nn.Linear(512, 512),
+    nn.ReLU(),
+    nn.Linear(512, 10),
+)
+model = model.to(device)
+model
+``` 
+### Architektur/Aufbau des Residual Net
 ```python
 class Net(nn.Module):
     def __init__(self):
@@ -376,9 +403,13 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-#model = Net().to(device)
 model = torchvision.models.resnet18(pretrained=True)
-model.fc = nn.Linear(512, 10)
+#model.fc = nn.Linear(512, 10)
+model.fc = nn.Sequential(# Layer im Resnet ein wenig komplexer gestalten für bessere Ergebnisse.
+    nn.Linear(512, 512),
+    nn.ReLU(),
+    nn.Linear(512, 10),
+)
 model = model.to(device)
 model
 
@@ -482,7 +513,7 @@ tensor([[-0.3908, -0.0048,  0.0782, -0.1384, -0.3805, -0.3151,  0.6134, -0.2620,
 ```python
  
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001) # Robustheit des Trainings durch Start mit kleiner Learning Rate
+optimizer = optim.Adam(model.parameters(), lr=0.0001) # im ResNet nochmals verkleinerte Learning Rate!
 softmax = nn.Softmax()
 
 for epoch in range(50):
