@@ -333,11 +333,11 @@ for epoch in range(10):
 10 train 0.63 0.78
 10 dev 1.51 0.60
 ```
-### Zwischenstand: Validation Werte (dev) gehen hoch - Train Kurve geht runter
-- Betrachung der Were genauer: train loss geht runter, train acc geht hoch, dev loss geht hoch, dev acc bewegt sich kaum.
-- wir haben eine niedriger werdenden train set error, daher high variance und müssten mehr daten reinbingen
-- zudem sind die Error Werte auf hohem Niveau.
-### Bessere Strategie ist, auf etablierte, empirisch nachgewiesen wirkungsvollere pretrained models zu setzen vor einer Anpassung der Lernparameter
+### Zwischenstand: Validation (dev) Werte steigen - Train Kurve fällt
+- Betrachung der Were genauer: train loss sinkt, train acc steigt, dev loss steigt, dev acc bewegt sich kaum.
+- Wir haben eine niedriger werdenden Trainset Error, daher High-Variance
+- Vergrößerung der Datenmenge oder Regularisierung sind die dem entsprechenden Maßnahmen
+### Bessere Strategie ist, auf etablierte, empirisch nachgewiesen wirkungsvollere pretrained Models zu setzen
 
 ### Zweiter Durchgang mit ResNet 18 (residual neuronal network)
 
